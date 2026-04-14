@@ -13,6 +13,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@vocivo/contracts": "workspace:*"
+    "@vocivo/contracts": "workspace:*",
+    "csv-parse": "^5.6.0"
   }
 }
