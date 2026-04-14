@@ -28,9 +28,10 @@ export async function getDashboardSnapshot({
   learnerRepository,
   now,
 }: GetDashboardSnapshotDependencies): Promise<DashboardSnapshot> {
-  const [setSummaries, entryStates] = await Promise.all([
+  const [setSummaries, entryStates, profile] = await Promise.all([
     contentRepository.getSetSummaries(),
     learnerRepository.listEntryStates(),
+    learnerRepository.getProfile(),
   ]);
 
   return {
@@ -39,9 +40,9 @@ export async function getDashboardSnapshot({
       .slice(0, NEGLECTED_SET_LIMIT),
     dueTodayCount: countDueToday(entryStates, now),
     weakEntryCount: entryStates.filter((entryState) => entryState.status === 'weak').length,
-    currentLevel: 0,
-    streakDays: 0,
-    totalXp: 0,
+    currentLevel: profile.currentLevel,
+    streakDays: profile.streakDays,
+    totalXp: profile.totalXp,
   };
 }
 

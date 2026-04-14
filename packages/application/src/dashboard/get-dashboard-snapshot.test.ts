@@ -69,6 +69,14 @@ const contentRepository: ContentRepository = {
 };
 
 const learnerRepository: LearnerRepository = {
+  async getProfile() {
+    return {
+      totalXp: 14400,
+      currentLevel: 12,
+      streakDays: 18,
+    };
+  },
+  async saveProfile() {},
   async listEntryStates() {
     return [
       {
@@ -126,6 +134,8 @@ describe('getDashboardSnapshot', () => {
     ]);
     expect(snapshot.dueTodayCount).toBe(2);
     expect(snapshot.weakEntryCount).toBe(1);
-    expect(snapshot.currentLevel).toBe(0);
+    expect(snapshot.currentLevel).toBe(12);
+    expect(snapshot.streakDays).toBe(18);
+    expect(snapshot.totalXp).toBe(14400);
   });
 });

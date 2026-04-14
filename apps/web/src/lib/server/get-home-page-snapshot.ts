@@ -103,12 +103,19 @@ const previewEntryStates: LearnerEntryState[] = [
   },
 ];
 
+const previewProfile = {
+  totalXp: 14400,
+  currentLevel: 12,
+  streakDays: 18,
+};
+
 export async function getHomePageSnapshot() {
   return getDashboardSnapshot({
     contentRepository: createInMemoryContentRepository({
       setSummaries: previewSetSummaries,
     }),
     learnerRepository: createInMemoryLearnerRepository({
+      profile: previewProfile,
       entryStates: previewEntryStates,
     }),
     now: new Date(),

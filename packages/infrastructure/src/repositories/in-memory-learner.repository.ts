@@ -1,14 +1,26 @@
-import type { LearnerEntryState, LearnerRepository, SetAggregate } from '@vocivo/contracts';
+import type {
+  LearnerEntryState,
+  LearnerProfile,
+  LearnerRepository,
+  SetAggregate,
+} from '@vocivo/contracts';
 
 interface CreateInMemoryLearnerRepositoryOptions {
+  profile?: LearnerProfile;
   entryStates?: LearnerEntryState[];
   setAggregates?: SetAggregate[];
 }
 
 export function createInMemoryLearnerRepository({
+  profile: initialProfile = {
+    totalXp: 0,
+    currentLevel: 0,
+    streakDays: 0,
+  },
   entryStates: initialEntryStates = [],
   setAggregates: initialSetAggregates = [],
 }: CreateInMemoryLearnerRepositoryOptions = {}): LearnerRepository {
+  let profile = initialProfile;
   const entryStates = new Map<string, LearnerEntryState>(
     initialEntryStates.map((entryState) => [entryState.entryId, entryState]),
   );
@@ -17,6 +29,12 @@ export function createInMemoryLearnerRepository({
   );
 
   return {
+    async getProfile() {
+      return profile;
+    },
+    async saveProfile(nextProfile) {
+      profile = nextProfile;
+    },
     async listEntryStates() {
       return [...entryStates.values()];
     },
