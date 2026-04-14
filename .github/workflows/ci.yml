@@ -32,13 +32,13 @@ jobs:
 
   app-checks:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('package.json', 'pnpm-lock.yaml') != '' }}
+    if: ${{ hashFiles('pnpm-lock.yaml') != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.30.3
 
       - uses: actions/setup-node@v4
         with:

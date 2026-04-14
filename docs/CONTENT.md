@@ -4,7 +4,7 @@
 
 Primary source file:
 
-- `/Users/jonx/Projects/vocivo/knowt_flashcards_translations_full.csv`
+- `/Users/jonx/Projects/vocivo/data/raw/knowt_flashcards_translations_full.csv`
 
 Current observed source characteristics:
 

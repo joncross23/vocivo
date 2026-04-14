@@ -23,7 +23,7 @@ This repository is currently in the planning and repo-bootstrap stage. Product d
 
 ## Current source data
 
-- Canonical CSV: [knowt_flashcards_translations_full.csv](knowt_flashcards_translations_full.csv)
+- Canonical CSV: [data/raw/knowt_flashcards_translations_full.csv](/Users/jonx/Projects/vocivo/data/raw/knowt_flashcards_translations_full.csv)
 
 ## Working expectations
 

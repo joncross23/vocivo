@@ -56,7 +56,7 @@ The tone should be:
 
 ## Content and navigation
 
-Vocivo is built around a single canonical vocabulary dataset sourced from `knowt_flashcards_translations_full.csv`.
+Vocivo is built around a single canonical vocabulary dataset sourced from `data/raw/knowt_flashcards_translations_full.csv`.
 
 Current source shape:
 
