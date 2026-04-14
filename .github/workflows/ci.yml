@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  repo-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required repo docs exist
+        run: |
+          test -f AGENTS.md
+          test -f CONTRIBUTING.md
+          test -f docs/SPEC.md
+          test -f docs/CONTENT.md
+          test -f docs/VISUAL-SYSTEM.md
+          test -f docs/architecture/MODULES.md
+          test -f docs/architecture/OWNERSHIP.md
+          test -f docs/architecture/GIT-PROCESS.md
+
+      - name: Validate branch naming on pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Checking branch: $BRANCH"
+          echo "$BRANCH" | grep -E '^(feat|fix|docs|chore|refactor|test|codex)/[a-z0-9._-]+$'
+
+  app-checks:
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('package.json', 'pnpm-lock.yaml') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

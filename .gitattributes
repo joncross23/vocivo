@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+*.md text
+*.csv text
+
+data/generated/** linguist-generated=true
