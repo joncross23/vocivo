@@ -20,6 +20,19 @@ describe('createInMemoryLearnerRepository', () => {
           correctInteractions: 0,
         },
       ],
+      setAggregates: [
+        {
+          setId: 'deck-1',
+          totalItems: 42,
+          itemsSeen: 12,
+          dueItems: 4,
+          weakItems: 2,
+          scoredInteractions: 20,
+          correctInteractions: 15,
+          practiceState: 'light-practice',
+          lastPractisedAt: '2026-04-12T09:00:00.000Z',
+        },
+      ],
     });
 
     await expect(repository.getProfile()).resolves.toEqual({
@@ -28,6 +41,19 @@ describe('createInMemoryLearnerRepository', () => {
       streakDays: 18,
     });
     await expect(repository.listEntryStates()).resolves.toHaveLength(1);
+    await expect(repository.listSetAggregates()).resolves.toEqual([
+      {
+        setId: 'deck-1',
+        totalItems: 42,
+        itemsSeen: 12,
+        dueItems: 4,
+        weakItems: 2,
+        scoredInteractions: 20,
+        correctInteractions: 15,
+        practiceState: 'light-practice',
+        lastPractisedAt: '2026-04-12T09:00:00.000Z',
+      },
+    ]);
 
     await repository.saveProfile({
       totalXp: 19600,

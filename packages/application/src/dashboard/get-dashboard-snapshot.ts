@@ -1,8 +1,10 @@
 import type {
   ContentRepository,
+  ContentSetDefinition,
   ContentSetSummary,
   LearnerRepository,
   LearnerEntryState,
+  SetAggregate,
 } from '@vocivo/contracts';
 import { rankPracticeState } from '@vocivo/domain';
 
@@ -28,14 +30,17 @@ export async function getDashboardSnapshot({
   learnerRepository,
   now,
 }: GetDashboardSnapshotDependencies): Promise<DashboardSnapshot> {
-  const [setSummaries, entryStates, profile] = await Promise.all([
-    contentRepository.getSetSummaries(),
+  const [setDefinitions, setAggregates, entryStates, profile] = await Promise.all([
+    contentRepository.getSetDefinitions(),
+    learnerRepository.listSetAggregates(),
     learnerRepository.listEntryStates(),
     learnerRepository.getProfile(),
   ]);
 
+  const sourceDeckSetSummaries = buildSourceDeckSetSummaries(setDefinitions, setAggregates);
+
   return {
-    neglectedSets: [...setSummaries]
+    neglectedSets: sourceDeckSetSummaries
       .sort(compareNeglectedSets)
       .slice(0, NEGLECTED_SET_LIMIT),
     dueTodayCount: countDueToday(entryStates, now),
@@ -43,6 +48,33 @@ export async function getDashboardSnapshot({
     currentLevel: profile.currentLevel,
     streakDays: profile.streakDays,
     totalXp: profile.totalXp,
+  };
+}
+
+function buildSourceDeckSetSummaries(
+  setDefinitions: ContentSetDefinition[],
+  setAggregates: SetAggregate[],
+): ContentSetSummary[] {
+  const setAggregateById = new Map(
+    setAggregates.map((setAggregate) => [setAggregate.setId, setAggregate]),
+  );
+
+  return setDefinitions
+    .filter((setDefinition) => setDefinition.kind === 'source-deck')
+    .map((setDefinition) => toContentSetSummary(setDefinition, setAggregateById.get(setDefinition.id)));
+}
+
+function toContentSetSummary(
+  setDefinition: ContentSetDefinition,
+  setAggregate?: SetAggregate,
+): ContentSetSummary {
+  return {
+    ...setDefinition,
+    itemsSeen: setAggregate?.itemsSeen ?? 0,
+    dueItems: setAggregate?.dueItems ?? 0,
+    weakItems: setAggregate?.weakItems ?? 0,
+    practiceState: setAggregate?.practiceState ?? 'untouched',
+    lastPractisedAt: setAggregate?.lastPractisedAt ?? null,
   };
 }
 

@@ -4,9 +4,6 @@ import { getDashboardSnapshot } from './get-dashboard-snapshot';
 
 const contentRepository: ContentRepository = {
   async getSetDefinitions() {
-    return [];
-  },
-  async getSetSummaries() {
     return [
       {
         id: 'set-well-practised',
@@ -17,11 +14,6 @@ const contentRepository: ContentRepository = {
         grammarTypeId: 'verbs',
         sourceDeckId: 'deck-travel-verbs',
         totalItems: 42,
-        itemsSeen: 33,
-        dueItems: 2,
-        weakItems: 1,
-        practiceState: 'well-practised',
-        lastPractisedAt: '2026-04-14T08:00:00.000Z',
       },
       {
         id: 'set-untouched',
@@ -32,11 +24,6 @@ const contentRepository: ContentRepository = {
         grammarTypeId: 'adjectives',
         sourceDeckId: 'deck-identity-adjectives',
         totalItems: 88,
-        itemsSeen: 0,
-        dueItems: 0,
-        weakItems: 0,
-        practiceState: 'untouched',
-        lastPractisedAt: null,
       },
       {
         id: 'set-light-practice',
@@ -47,11 +34,6 @@ const contentRepository: ContentRepository = {
         grammarTypeId: 'nouns',
         sourceDeckId: 'deck-media-nouns',
         totalItems: 28,
-        itemsSeen: 5,
-        dueItems: 4,
-        weakItems: 2,
-        practiceState: 'light-practice',
-        lastPractisedAt: '2026-03-12T10:00:00.000Z',
       },
       {
         id: 'set-active-practice',
@@ -62,13 +44,11 @@ const contentRepository: ContentRepository = {
         grammarTypeId: 'nouns',
         sourceDeckId: 'deck-free-time-nouns',
         totalItems: 51,
-        itemsSeen: 19,
-        dueItems: 6,
-        weakItems: 1,
-        practiceState: 'active-practice',
-        lastPractisedAt: '2026-04-11T09:30:00.000Z',
       },
     ];
+  },
+  async getSetSummaries() {
+    return [];
   },
   async getEntries() {
     return [];
@@ -119,6 +99,54 @@ const learnerRepository: LearnerRepository = {
     return null;
   },
   async saveEntryState() {},
+  async listSetAggregates() {
+    return [
+      {
+        setId: 'set-well-practised',
+        totalItems: 42,
+        itemsSeen: 33,
+        dueItems: 2,
+        weakItems: 1,
+        scoredInteractions: 44,
+        correctInteractions: 38,
+        practiceState: 'well-practised',
+        lastPractisedAt: '2026-04-14T08:00:00.000Z',
+      },
+      {
+        setId: 'set-untouched',
+        totalItems: 88,
+        itemsSeen: 0,
+        dueItems: 0,
+        weakItems: 0,
+        scoredInteractions: 0,
+        correctInteractions: 0,
+        practiceState: 'untouched',
+        lastPractisedAt: null,
+      },
+      {
+        setId: 'set-light-practice',
+        totalItems: 28,
+        itemsSeen: 5,
+        dueItems: 4,
+        weakItems: 2,
+        scoredInteractions: 8,
+        correctInteractions: 5,
+        practiceState: 'light-practice',
+        lastPractisedAt: '2026-03-12T10:00:00.000Z',
+      },
+      {
+        setId: 'set-active-practice',
+        totalItems: 51,
+        itemsSeen: 19,
+        dueItems: 6,
+        weakItems: 1,
+        scoredInteractions: 28,
+        correctInteractions: 21,
+        practiceState: 'active-practice',
+        lastPractisedAt: '2026-04-11T09:30:00.000Z',
+      },
+    ];
+  },
   async getSetAggregate() {
     return null;
   },

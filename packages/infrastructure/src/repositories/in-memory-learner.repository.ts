@@ -44,6 +44,9 @@ export function createInMemoryLearnerRepository({
     async saveEntryState(entryState) {
       entryStates.set(entryState.entryId, entryState);
     },
+    async listSetAggregates() {
+      return [...setAggregates.values()];
+    },
     async getSetAggregate(setId) {
       return setAggregates.get(setId) ?? null;
     },

@@ -8,6 +8,7 @@ export interface LearnerRepository {
   listEntryStates(): Promise<LearnerEntryState[]>;
   getEntryState(entryId: string): Promise<LearnerEntryState | null>;
   saveEntryState(entryState: LearnerEntryState): Promise<void>;
+  listSetAggregates(): Promise<SetAggregate[]>;
   getSetAggregate(setId: string): Promise<SetAggregate | null>;
   saveSetAggregate(setAggregate: SetAggregate): Promise<void>;
 }

@@ -22,8 +22,9 @@ export function HomePage({ snapshot }: HomePageProps) {
             Vocivo
           </p>
           <p className="mt-2 max-w-xl text-sm text-fog sm:text-base">
-            Command-deck dashboard backed by shared application read models for
-            neglected sets, due review, and learner profile totals.
+            Command-deck dashboard backed by shared application read models that
+            join live content sets with learner practice coverage, due review,
+            and profile totals.
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -80,8 +81,8 @@ export function HomePage({ snapshot }: HomePageProps) {
             ))}
           </ul>
           <p className="mt-4 text-xs text-fog">
-            Dashboard metrics are now flowing through the shared application
-            path with profile-backed level and streak values.
+            Neglected sets now come from the CSV-backed catalogue joined with
+            learner-side set aggregates.
           </p>
         </div>
       </section>
