@@ -13,6 +13,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@vocivo/content-pipeline": "workspace:*",
     "@vocivo/contracts": "workspace:*"
   }
 }

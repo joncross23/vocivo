@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-dashboard-grid px-6 py-8 sm:px-10">
@@ -8,13 +10,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Vocivo
             </p>
             <p className="text-xs uppercase tracking-[0.28em] text-fog">
-              Workspace scaffold
+              Command deck
             </p>
           </div>
           <nav className="flex items-center gap-4 text-sm text-fog">
-            <span>Dashboard</span>
-            <span>Browse</span>
-            <span>Decks</span>
+            <Link href="/" className="transition-colors hover:text-chalk">Dashboard</Link>
+            <Link href="/browse" className="transition-colors hover:text-chalk">Browse</Link>
+            <span>Study</span>
             <span>Stats</span>
           </nav>
         </header>

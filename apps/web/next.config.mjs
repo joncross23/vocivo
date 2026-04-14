@@ -2,6 +2,7 @@
 const nextConfig = {
   transpilePackages: [
     '@vocivo/application',
+    '@vocivo/content-pipeline',
     '@vocivo/contracts',
     '@vocivo/domain',
     '@vocivo/infrastructure',

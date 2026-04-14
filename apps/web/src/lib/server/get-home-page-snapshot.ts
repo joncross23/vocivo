@@ -8,6 +8,7 @@ import {
 const previewSetSummaries: ContentSetSummary[] = [
   {
     id: 'set-identity-adjectives',
+    kind: 'source-deck',
     title: 'Identity / adjectives',
     themeId: 'theme-1',
     categoryId: 'identity-and-relationships',
@@ -22,6 +23,7 @@ const previewSetSummaries: ContentSetSummary[] = [
   },
   {
     id: 'set-media-nouns',
+    kind: 'source-deck',
     title: 'Media / nouns',
     themeId: 'theme-3',
     categoryId: 'media-and-technology',
@@ -36,6 +38,7 @@ const previewSetSummaries: ContentSetSummary[] = [
   },
   {
     id: 'set-education-verbs',
+    kind: 'source-deck',
     title: 'Education / verbs',
     themeId: 'theme-1',
     categoryId: 'education-and-work',
@@ -50,6 +53,7 @@ const previewSetSummaries: ContentSetSummary[] = [
   },
   {
     id: 'set-travel-verbs',
+    kind: 'source-deck',
     title: 'Travel / verbs',
     themeId: 'theme-3',
     categoryId: 'travel-and-tourism',

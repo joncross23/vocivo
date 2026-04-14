@@ -23,10 +23,10 @@ data/
 
 ## Dependency rules
 
-- `apps/web` may depend on `ui`, `application`, `contracts`
+- `apps/web` may depend on `ui`, `application`, `contracts`, `infrastructure`
 - `ui` may depend on `contracts`
 - `application` may depend on `domain`, `contracts`
-- `infrastructure` may depend on `contracts`, `domain`
+- `infrastructure` may depend on `contracts`, `domain`, `content-pipeline`
 - `content-pipeline` may depend on `contracts`, `domain`
 - `domain` may depend only on `contracts`
 - `contracts` depends on nothing inside the repo

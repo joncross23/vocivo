@@ -110,6 +110,9 @@ importers:
 
   packages/infrastructure:
     dependencies:
+      '@vocivo/content-pipeline':
+        specifier: workspace:*
+        version: link:../content-pipeline
       '@vocivo/contracts':
         specifier: workspace:*
         version: link:../contracts

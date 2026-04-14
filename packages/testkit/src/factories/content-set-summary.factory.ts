@@ -5,6 +5,7 @@ export function createContentSetSummary(
 ): ContentSetSummary {
   return {
     id: 'theme-3.media-and-technology.nouns',
+    kind: 'source-deck',
     title: 'Media and technology / nouns',
     themeId: 'theme-3',
     categoryId: 'media-and-technology',

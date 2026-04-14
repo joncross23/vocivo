@@ -1,20 +1,28 @@
 import type {
   ContentEntry,
   ContentRepository,
+  ContentSetDefinition,
   ContentSetSummary,
   SessionSelection,
 } from '@vocivo/contracts';
 
 interface CreateInMemoryContentRepositoryOptions {
   entries?: ContentEntry[];
+  setDefinitions?: ContentSetDefinition[];
   setSummaries?: ContentSetSummary[];
 }
 
 export function createInMemoryContentRepository({
   entries = [],
+  setDefinitions = [],
   setSummaries = [],
 }: CreateInMemoryContentRepositoryOptions = {}): ContentRepository {
   return {
+    async getSetDefinitions() {
+      return setDefinitions.length > 0
+        ? setDefinitions
+        : setSummaries.map(toContentSetDefinition);
+    },
     async getSetSummaries(selection) {
       return setSummaries.filter((setSummary) => matchesSelection(setSummary, selection));
     },
@@ -49,4 +57,43 @@ function matchesIdFilter(filterValues: string[], candidateValue: string | null):
   }
 
   return candidateValue !== null && filterValues.includes(candidateValue);
+}
+
+function toContentSetDefinition(setSummary: ContentSetSummary): ContentSetDefinition {
+  const {
+    id,
+    title,
+    themeId,
+    categoryId,
+    grammarTypeId,
+    sourceDeckId,
+    totalItems,
+  } = setSummary;
+
+  return {
+    id,
+    kind: inferContentSetKind(setSummary),
+    title,
+    themeId,
+    categoryId,
+    grammarTypeId,
+    sourceDeckId,
+    totalItems,
+  };
+}
+
+function inferContentSetKind(setSummary: ContentSetSummary): ContentSetDefinition['kind'] {
+  if (setSummary.sourceDeckId !== null) {
+    return 'source-deck';
+  }
+
+  if (setSummary.grammarTypeId !== null) {
+    return 'grammar-type';
+  }
+
+  if (setSummary.categoryId !== null) {
+    return 'category';
+  }
+
+  return 'theme';
 }

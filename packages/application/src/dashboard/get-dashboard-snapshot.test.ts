@@ -3,10 +3,14 @@ import type { ContentRepository, LearnerRepository } from '@vocivo/contracts';
 import { getDashboardSnapshot } from './get-dashboard-snapshot';
 
 const contentRepository: ContentRepository = {
+  async getSetDefinitions() {
+    return [];
+  },
   async getSetSummaries() {
     return [
       {
         id: 'set-well-practised',
+        kind: 'source-deck',
         title: 'Travel / verbs',
         themeId: 'theme-3',
         categoryId: 'travel-and-tourism',
@@ -21,6 +25,7 @@ const contentRepository: ContentRepository = {
       },
       {
         id: 'set-untouched',
+        kind: 'source-deck',
         title: 'Identity / adjectives',
         themeId: 'theme-1',
         categoryId: 'identity-and-relationships',
@@ -35,6 +40,7 @@ const contentRepository: ContentRepository = {
       },
       {
         id: 'set-light-practice',
+        kind: 'source-deck',
         title: 'Media / nouns',
         themeId: 'theme-3',
         categoryId: 'media-and-technology',
@@ -49,6 +55,7 @@ const contentRepository: ContentRepository = {
       },
       {
         id: 'set-active-practice',
+        kind: 'source-deck',
         title: 'Free time / nouns',
         themeId: 'theme-2',
         categoryId: 'free-time-activities',
