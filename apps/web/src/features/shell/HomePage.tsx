@@ -1,3 +1,4 @@
+import type { DashboardSnapshot } from '@vocivo/application';
 import { AppShell } from './AppShell';
 
 const launchItems = [
@@ -8,7 +9,11 @@ const launchItems = [
   'Games',
 ] as const;
 
-export function HomePage() {
+interface HomePageProps {
+  snapshot: DashboardSnapshot;
+}
+
+export function HomePage({ snapshot }: HomePageProps) {
   return (
     <AppShell>
       <section className="grid gap-6 lg:grid-cols-[1.3fr,0.9fr]">
@@ -22,9 +27,9 @@ export function HomePage() {
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            <Stat label="Level" value="12" />
-            <Stat label="Streak" value="18" />
-            <Stat label="Due today" value="34" />
+            <Stat label="Level" value={formatMetric(snapshot.currentLevel)} />
+            <Stat label="Streak" value={formatMetric(snapshot.streakDays)} />
+            <Stat label="Due today" value={formatMetric(snapshot.dueTodayCount)} />
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -41,14 +46,43 @@ export function HomePage() {
         </div>
 
         <div className="rounded-3xl border border-glow/20 bg-black/20 p-6">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-glow">
-            Workspace status
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-glow">
+              Neglected sets
+            </p>
+            <p className="text-xs uppercase tracking-[0.25em] text-fog">
+              Weak words {formatMetric(snapshot.weakEntryCount)}
+            </p>
+          </div>
           <ul className="mt-4 space-y-3 text-sm text-fog">
-            <li>Contracts, domain, application, UI, infrastructure, and testkit packages scaffolded.</li>
-            <li>Next.js app shell ready for dashboard and browsing slices.</li>
-            <li>CI will expand from repo hygiene into app checks once dependencies are installed.</li>
+            {snapshot.neglectedSets.map((setSummary) => (
+              <li
+                key={setSummary.id}
+                className="rounded-2xl border border-white/10 bg-white/5 p-4"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="font-medium text-chalk">{setSummary.title}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.24em] text-fog">
+                      {formatPracticeState(setSummary.practiceState)}
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-glow/20 px-3 py-1 text-xs text-chalk">
+                    {setSummary.totalItems} words
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-fog">
+                  <span>Seen {setSummary.itemsSeen}</span>
+                  <span>Due {setSummary.dueItems}</span>
+                  <span>Weak {setSummary.weakItems}</span>
+                </div>
+              </li>
+            ))}
           </ul>
+          <p className="mt-4 text-xs text-fog">
+            Dashboard metrics are now flowing through the shared application path.
+            XP and streak remain placeholders until persistence lands.
+          </p>
         </div>
       </section>
     </AppShell>
@@ -62,4 +96,12 @@ function Stat({ label, value }: { label: string; value: string }) {
       <p className="mt-2 font-display text-3xl tracking-tight text-chalk">{value}</p>
     </div>
   );
+}
+
+function formatMetric(value: number): string {
+  return value.toString();
+}
+
+function formatPracticeState(value: DashboardSnapshot['neglectedSets'][number]['practiceState']): string {
+  return value.replace('-', ' ');
 }

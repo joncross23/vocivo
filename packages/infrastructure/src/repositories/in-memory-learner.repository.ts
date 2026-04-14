@@ -1,10 +1,25 @@
 import type { LearnerEntryState, LearnerRepository, SetAggregate } from '@vocivo/contracts';
 
-export function createInMemoryLearnerRepository(): LearnerRepository {
-  const entryStates = new Map<string, LearnerEntryState>();
-  const setAggregates = new Map<string, SetAggregate>();
+interface CreateInMemoryLearnerRepositoryOptions {
+  entryStates?: LearnerEntryState[];
+  setAggregates?: SetAggregate[];
+}
+
+export function createInMemoryLearnerRepository({
+  entryStates: initialEntryStates = [],
+  setAggregates: initialSetAggregates = [],
+}: CreateInMemoryLearnerRepositoryOptions = {}): LearnerRepository {
+  const entryStates = new Map<string, LearnerEntryState>(
+    initialEntryStates.map((entryState) => [entryState.entryId, entryState]),
+  );
+  const setAggregates = new Map<string, SetAggregate>(
+    initialSetAggregates.map((setAggregate) => [setAggregate.setId, setAggregate]),
+  );
 
   return {
+    async listEntryStates() {
+      return [...entryStates.values()];
+    },
     async getEntryState(entryId) {
       return entryStates.get(entryId) ?? null;
     },

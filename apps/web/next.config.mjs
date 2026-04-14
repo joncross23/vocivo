@@ -4,6 +4,7 @@ const nextConfig = {
     '@vocivo/application',
     '@vocivo/contracts',
     '@vocivo/domain',
+    '@vocivo/infrastructure',
     '@vocivo/ui',
   ],
 };

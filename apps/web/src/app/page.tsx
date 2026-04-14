@@ -1,5 +1,8 @@
 import { HomePage } from '../features/shell/HomePage';
+import { getHomePageSnapshot } from '../lib/server/get-home-page-snapshot';
 
-export default function Page() {
-  return <HomePage />;
+export default async function Page() {
+  const snapshot = await getHomePageSnapshot();
+
+  return <HomePage snapshot={snapshot} />;
 }

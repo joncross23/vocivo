@@ -1,9 +1,76 @@
-import type { ContentSetSummary } from '@vocivo/contracts';
+import type {
+  ContentRepository,
+  ContentSetSummary,
+  LearnerRepository,
+  LearnerEntryState,
+} from '@vocivo/contracts';
+import { rankPracticeState } from '@vocivo/domain';
 
 export interface DashboardSnapshot {
-  highlightedSets: ContentSetSummary[];
+  neglectedSets: ContentSetSummary[];
+  dueTodayCount: number;
+  weakEntryCount: number;
+  currentLevel: number;
+  streakDays: number;
+  totalXp: number;
 }
 
-export function getDashboardSnapshot(highlightedSets: ContentSetSummary[]): DashboardSnapshot {
-  return { highlightedSets };
+export interface GetDashboardSnapshotDependencies {
+  contentRepository: ContentRepository;
+  learnerRepository: LearnerRepository;
+  now: Date;
+}
+
+const NEGLECTED_SET_LIMIT = 4;
+
+export async function getDashboardSnapshot({
+  contentRepository,
+  learnerRepository,
+  now,
+}: GetDashboardSnapshotDependencies): Promise<DashboardSnapshot> {
+  const [setSummaries, entryStates] = await Promise.all([
+    contentRepository.getSetSummaries(),
+    learnerRepository.listEntryStates(),
+  ]);
+
+  return {
+    neglectedSets: [...setSummaries]
+      .sort(compareNeglectedSets)
+      .slice(0, NEGLECTED_SET_LIMIT),
+    dueTodayCount: countDueToday(entryStates, now),
+    weakEntryCount: entryStates.filter((entryState) => entryState.status === 'weak').length,
+    currentLevel: 0,
+    streakDays: 0,
+    totalXp: 0,
+  };
+}
+
+function compareNeglectedSets(left: ContentSetSummary, right: ContentSetSummary): number {
+  const practiceStateDelta = rankPracticeState(left.practiceState) - rankPracticeState(right.practiceState);
+
+  if (practiceStateDelta !== 0) {
+    return practiceStateDelta;
+  }
+
+  const leftLastPractisedTime = left.lastPractisedAt === null ? Number.NEGATIVE_INFINITY : Date.parse(left.lastPractisedAt);
+  const rightLastPractisedTime = right.lastPractisedAt === null ? Number.NEGATIVE_INFINITY : Date.parse(right.lastPractisedAt);
+
+  if (leftLastPractisedTime !== rightLastPractisedTime) {
+    return leftLastPractisedTime - rightLastPractisedTime;
+  }
+
+  return left.itemsSeen - right.itemsSeen;
+}
+
+function countDueToday(entryStates: LearnerEntryState[], now: Date): number {
+  const endOfToday = new Date(now);
+  endOfToday.setHours(23, 59, 59, 999);
+
+  return entryStates.filter((entryState) => {
+    if (entryState.dueAt === null) {
+      return false;
+    }
+
+    return Date.parse(entryState.dueAt) <= endOfToday.getTime();
+  }).length;
 }
