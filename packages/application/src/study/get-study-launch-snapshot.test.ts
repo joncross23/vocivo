@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ContentRepository } from '@vocivo/contracts';
-import { getFlashcardSession } from './get-flashcard-session';
+import { getStudyLaunchSnapshot } from './get-study-launch-snapshot';
 
 const contentRepository: ContentRepository = {
   async getSetDefinitions() {
@@ -87,7 +87,7 @@ const contentRepository: ContentRepository = {
         answerComplexity: 'clean',
         modeEligibility: {
           reverseSafe: true,
-          typingSafe: true,
+          typingSafe: false,
           matchingSafe: true,
           arcadeSafe: true,
         },
@@ -96,9 +96,9 @@ const contentRepository: ContentRepository = {
   },
 };
 
-describe('getFlashcardSession', () => {
-  it('builds a deck-backed flashcard session snapshot', async () => {
-    const snapshot = await getFlashcardSession({
+describe('getStudyLaunchSnapshot', () => {
+  it('builds launcher data for a selected study scope', async () => {
+    const snapshot = await getStudyLaunchSnapshot({
       contentRepository,
       selection: {
         themeIds: [],
@@ -111,19 +111,16 @@ describe('getFlashcardSession', () => {
       },
     });
 
-    expect(snapshot?.selection.sourceDeckIds).toEqual(['deck-media-nouns']);
-    expect(snapshot?.theme?.id).toBe('theme-3');
-    expect(snapshot?.category?.id).toBe('media-and-technology');
-    expect(snapshot?.grammarType?.id).toBe('nouns');
-    expect(snapshot?.resultCount).toBe(2);
-    expect(snapshot?.sourceDecks.map((setDefinition) => setDefinition.id)).toEqual([
+    expect(snapshot.resultCount).toBe(2);
+    expect(snapshot.flashcardEligibleCount).toBe(2);
+    expect(snapshot.practiceTestEligibleCount).toBe(1);
+    expect(snapshot.matchingEligibleCount).toBe(2);
+    expect(snapshot.theme?.id).toBe('theme-3');
+    expect(snapshot.category?.id).toBe('media-and-technology');
+    expect(snapshot.grammarType?.id).toBe('nouns');
+    expect(snapshot.sourceDecks.map((setDefinition) => setDefinition.id)).toEqual([
       'deck-media-nouns',
     ]);
-    expect(snapshot?.sourceDeckDefinitions.map((setDefinition) => setDefinition.id)).toEqual([
-      'deck-media-nouns',
-    ]);
-    expect(snapshot?.selectedEntries).toHaveLength(2);
-    expect(snapshot?.sourceDeckEntries).toHaveLength(2);
-    expect(snapshot?.entries).toHaveLength(2);
+    expect(snapshot.previewEntries).toHaveLength(2);
   });
 });

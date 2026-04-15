@@ -2,55 +2,67 @@ import type {
   ContentEntry,
   ContentRepository,
   ContentSetDefinition,
+  SessionSelection,
 } from '@vocivo/contracts';
+import { resolveSelectionContext } from './resolve-selection-context';
 
 export interface FlashcardSessionSnapshot {
-  deck: ContentSetDefinition;
+  selection: SessionSelection;
   entries: ContentEntry[];
+  selectedEntries: ContentEntry[];
+  sourceDeckEntries: ContentEntry[];
+  resultCount: number;
   theme: ContentSetDefinition | null;
   category: ContentSetDefinition | null;
   grammarType: ContentSetDefinition | null;
+  sourceDecks: ContentSetDefinition[];
   sourceDeckDefinitions: ContentSetDefinition[];
 }
 
 export interface GetFlashcardSessionDependencies {
   contentRepository: ContentRepository;
-  deckId: string;
+  selection: SessionSelection;
+  limit?: number;
 }
 
 export async function getFlashcardSession({
   contentRepository,
-  deckId,
+  selection,
+  limit = 20,
 }: GetFlashcardSessionDependencies): Promise<FlashcardSessionSnapshot | null> {
   const setDefinitions = await contentRepository.getSetDefinitions();
-  const deck = setDefinitions.find((setDefinition) =>
-    setDefinition.kind === 'source-deck' && setDefinition.id === deckId);
+  const selectionContext = resolveSelectionContext(setDefinitions, selection);
+  const selectedEntries = await contentRepository.getEntries(
+    selection,
+    Number.MAX_SAFE_INTEGER,
+  );
 
-  if (deck === undefined) {
+  if (selectedEntries.length === 0) {
     return null;
   }
 
-  const entries = await contentRepository.getEntries({
-    themeIds: [],
-    categoryIds: [],
-    grammarTypeIds: [],
-    sourceDeckIds: [deckId],
-    includeWeakOnly: false,
-    includeDueOnly: false,
-    includeBookmarkedOnly: false,
-  }, deck.totalItems);
+  const sourceDeckEntries = selectionContext.matchingSourceDecks.length === 0
+    ? selectedEntries
+    : await contentRepository.getEntries({
+      themeIds: [],
+      categoryIds: [],
+      grammarTypeIds: [],
+      sourceDeckIds: selectionContext.matchingSourceDecks.map((sourceDeck) => sourceDeck.id),
+      includeWeakOnly: false,
+      includeDueOnly: false,
+      includeBookmarkedOnly: false,
+    }, Number.MAX_SAFE_INTEGER);
 
   return {
-    deck,
-    entries,
-    theme: setDefinitions.find((setDefinition) =>
-      setDefinition.kind === 'theme' && setDefinition.id === deck.themeId) ?? null,
-    category: setDefinitions.find((setDefinition) =>
-      setDefinition.kind === 'category' && setDefinition.id === deck.categoryId) ?? null,
-    grammarType: setDefinitions.find((setDefinition) =>
-      setDefinition.kind === 'grammar-type' && setDefinition.id === deck.grammarTypeId) ?? null,
-    sourceDeckDefinitions: setDefinitions.filter(
-      (setDefinition) => setDefinition.kind === 'source-deck',
-    ),
+    selection,
+    entries: selectedEntries.slice(0, limit),
+    selectedEntries,
+    sourceDeckEntries,
+    resultCount: selectedEntries.length,
+    theme: selectionContext.theme,
+    category: selectionContext.category,
+    grammarType: selectionContext.grammarType,
+    sourceDecks: selectionContext.matchingSourceDecks,
+    sourceDeckDefinitions: selectionContext.sourceDeckDefinitions,
   };
 }

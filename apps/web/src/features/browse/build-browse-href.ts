@@ -1,4 +1,5 @@
 import type { SessionSelection } from '@vocivo/contracts';
+import { buildBrowseHrefFromSelection } from '../../lib/session-selection';
 
 export function buildBrowseHref(
   selection: SessionSelection,
@@ -8,27 +9,18 @@ export function buildBrowseHref(
     grammarTypeId: string | null;
   }>,
 ): string {
-  const nextSelection = {
-    themeId: update.themeId !== undefined ? update.themeId : selection.themeIds[0] ?? null,
-    categoryId: update.categoryId !== undefined ? update.categoryId : selection.categoryIds[0] ?? null,
-    grammarTypeId:
-      update.grammarTypeId !== undefined ? update.grammarTypeId : selection.grammarTypeIds[0] ?? null,
-  };
+  return buildBrowseHrefFromSelection({
+    ...selection,
+    themeIds: toIds(update.themeId, selection.themeIds),
+    categoryIds: toIds(update.categoryId, selection.categoryIds),
+    grammarTypeIds: toIds(update.grammarTypeId, selection.grammarTypeIds),
+  });
+}
 
-  const params = new URLSearchParams();
-
-  if (nextSelection.themeId !== null) {
-    params.set('theme', nextSelection.themeId);
+function toIds(nextId: string | null | undefined, currentIds: string[]): string[] {
+  if (nextId === undefined) {
+    return currentIds;
   }
 
-  if (nextSelection.categoryId !== null) {
-    params.set('category', nextSelection.categoryId);
-  }
-
-  if (nextSelection.grammarTypeId !== null) {
-    params.set('grammar', nextSelection.grammarTypeId);
-  }
-
-  const query = params.toString();
-  return query.length > 0 ? `/browse?${query}` : '/browse';
+  return nextId === null ? [] : [nextId];
 }

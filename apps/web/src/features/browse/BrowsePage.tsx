@@ -8,6 +8,7 @@ import type {
   SessionSelection,
 } from '@vocivo/contracts';
 import { usePersistedSetSummaryMap } from '../../lib/client/use-persisted-set-summary-map';
+import { buildStudyHref } from '../../lib/session-selection';
 import { AppShell } from '../shell/AppShell';
 import { buildBrowseHref } from './build-browse-href';
 
@@ -47,6 +48,17 @@ export function BrowsePage({ snapshot, allSetDefinitions }: BrowsePageProps) {
                 {snapshot.resultCount}
               </p>
             </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href={buildStudyHref({
+                selection: snapshot.selection,
+              })}
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-chalk transition-transform hover:-translate-y-0.5 hover:bg-white/10"
+            >
+              Study this selection
+            </Link>
           </div>
         </div>
 

@@ -4,6 +4,10 @@ import Link from 'next/link';
 import type { DeckDetailSnapshot } from '@vocivo/application';
 import type { ContentSetDefinition, ContentSetSummary } from '@vocivo/contracts';
 import { usePersistedSetSummaryMap } from '../../lib/client/use-persisted-set-summary-map';
+import {
+  buildStudyHref,
+  createDeckSelection,
+} from '../../lib/session-selection';
 import { AppShell } from '../shell/AppShell';
 
 interface DeckDetailPageProps {
@@ -15,6 +19,7 @@ export function DeckDetailPage({
   snapshot,
   allSetDefinitions,
 }: DeckDetailPageProps) {
+  const deckSelection = createDeckSelection(snapshot.deck.id);
   const setSummaryMap = usePersistedSetSummaryMap({
     allSetDefinitions,
     seedSourceDeckDefinitions: allSetDefinitions.filter(
@@ -53,14 +58,32 @@ export function DeckDetailPage({
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href={`/study/flashcards/${snapshot.deck.id}`}
+              href={buildStudyHref({
+                selection: deckSelection,
+                mode: 'flashcards',
+              })}
               className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-chalk transition-transform hover:-translate-y-0.5 hover:bg-white/10"
             >
               Flashcards
             </Link>
-            <ActionButton label="Practice test" />
-            <ActionButton label="Match" />
-            <ActionButton label="Spaced review" />
+            <ActionLink
+              href={buildStudyHref({
+                selection: deckSelection,
+              })}
+              label="Study launcher"
+            />
+            <ActionLink
+              href={buildStudyHref({
+                selection: deckSelection,
+              })}
+              label="Practice test setup"
+            />
+            <ActionLink
+              href={buildStudyHref({
+                selection: deckSelection,
+              })}
+              label="Match setup"
+            />
           </div>
         </div>
 
@@ -131,14 +154,20 @@ function CoverageStat({
   );
 }
 
-function ActionButton({ label }: { label: string }) {
+function ActionLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
       className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-chalk transition-transform hover:-translate-y-0.5 hover:bg-white/10"
     >
       {label}
-    </button>
+    </Link>
   );
 }
 

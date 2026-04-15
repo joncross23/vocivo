@@ -8,6 +8,7 @@ import {
   buildUpdatedLearnerProfile,
 } from '@vocivo/application';
 import type {
+  ContentSetDefinition,
   FlashcardRating,
   LearnerEntryState,
   LearnerProfile,
@@ -16,6 +17,7 @@ import type {
 } from '@vocivo/contracts';
 import { useEffect, useState } from 'react';
 import { ensurePreviewLearnerSeed } from '../../../lib/client/browser-learner';
+import { buildStudyHref } from '../../../lib/session-selection';
 import { AppShell } from '../../shell/AppShell';
 
 interface FlashcardsPageProps {
@@ -32,13 +34,8 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
     streakDays: 0,
   });
   const [entryStateMap, setEntryStateMap] = useState<Map<string, LearnerEntryState>>(new Map());
-  const [deckAggregate, setDeckAggregate] = useState<SetAggregate>(() =>
-    buildSourceDeckAggregate({
-      deckDefinition: snapshot.deck,
-      entries: snapshot.entries,
-      entryStates: [],
-      now: new Date(),
-    }));
+  const [scopeAggregate, setScopeAggregate] = useState<SetAggregate>(() =>
+    buildSelectionAggregate(snapshot, [], new Date()));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -54,6 +51,11 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
   const currentEntryState = currentEntry === null
     ? null
     : entryStateMap.get(currentEntry.id) ?? null;
+  const selectionTitle = getSelectionTitle(snapshot);
+  const selectionMeta = getSelectionMeta(snapshot);
+  const launcherHref = buildStudyHref({
+    selection: snapshot.selection,
+  });
 
   useEffect(() => {
     let isCancelled = false;
@@ -65,16 +67,13 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
         repository.listEntryStates(),
       ]);
       const nextEntryStateMap = new Map(
-        entryStates
-          .filter((entryState) => snapshot.entries.some((entry) => entry.id === entryState.entryId))
-          .map((entryState) => [entryState.entryId, entryState]),
+        entryStates.map((entryState) => [entryState.entryId, entryState]),
       );
-      const nextDeckAggregate = buildSourceDeckAggregate({
-        deckDefinition: snapshot.deck,
-        entries: snapshot.entries,
-        entryStates: [...nextEntryStateMap.values()],
-        now: new Date(),
-      });
+      const nextScopeAggregate = buildSelectionAggregate(
+        snapshot,
+        entryStates,
+        new Date(),
+      );
 
       if (isCancelled) {
         return;
@@ -83,7 +82,7 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
       setLearnerRepository(repository);
       setLearnerProfile(profile);
       setEntryStateMap(nextEntryStateMap);
-      setDeckAggregate(nextDeckAggregate);
+      setScopeAggregate(nextScopeAggregate);
     }
 
     void loadLearnerState();
@@ -91,7 +90,7 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
     return () => {
       isCancelled = true;
     };
-  }, [snapshot.deck, snapshot.entries]);
+  }, [snapshot]);
 
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
@@ -138,17 +137,18 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
               Session complete
             </p>
             <p className="mt-3 font-display text-4xl uppercase tracking-tight text-chalk sm:text-5xl">
-              {snapshot.deck.title}
+              {selectionTitle}
             </p>
             <p className="mt-3 max-w-2xl text-sm text-fog sm:text-base">
               Real flashcard ratings have been written into learner entry state,
-              deck coverage, and shared XP totals.
+              shared XP totals, and per-deck coverage across {snapshot.sourceDecks.length} matching decks.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <div className="mt-8 grid gap-3 sm:grid-cols-4">
               <SummaryStat label="Session XP" value={String(sessionXp)} />
               <SummaryStat label="Level" value={String(learnerProfile.currentLevel)} />
-              <SummaryStat label="Deck coverage" value={`${deckAggregate.itemsSeen}/${deckAggregate.totalItems}`} />
+              <SummaryStat label="Scope coverage" value={`${scopeAggregate.itemsSeen}/${scopeAggregate.totalItems}`} />
+              <SummaryStat label="Matching decks" value={String(snapshot.sourceDecks.length)} />
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-4">
@@ -181,10 +181,10 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
                 Study again
               </button>
               <Link
-                href={`/decks/${snapshot.deck.id}`}
+                href={launcherHref}
                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-chalk transition-transform hover:-translate-y-0.5 hover:bg-white/10"
               >
-                Back to deck
+                Back to study
               </Link>
               <Link
                 href="/browse"
@@ -209,18 +209,20 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
                 Flashcards
               </p>
               <p className="mt-3 font-display text-4xl uppercase tracking-tight text-chalk sm:text-5xl">
-                {snapshot.deck.title}
+                {selectionTitle}
               </p>
-              <p className="mt-3 text-sm text-fog">
-                {snapshot.theme?.title ?? 'Unknown theme'} / {snapshot.category?.title ?? 'Unknown category'} /{' '}
-                {snapshot.grammarType?.title ?? 'Unknown grammar type'}
+              <p className="mt-3 max-w-2xl text-sm text-fog">
+                {selectionMeta}
               </p>
             </div>
 
             <div className="rounded-2xl border border-glow/20 bg-black/20 px-4 py-3 text-right">
-              <p className="text-xs uppercase tracking-[0.22em] text-fog">Progress</p>
+              <p className="text-xs uppercase tracking-[0.22em] text-fog">Queue</p>
               <p className="mt-1 font-display text-3xl tracking-tight text-chalk">
                 {currentIndex + 1}/{snapshot.entries.length}
+              </p>
+              <p className="mt-2 text-xs uppercase tracking-[0.18em] text-fog">
+                {snapshot.resultCount} matching cards
               </p>
             </div>
           </div>
@@ -321,13 +323,13 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
               Live coverage
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <SummaryStat label="Practised" value={`${deckAggregate.itemsSeen}/${deckAggregate.totalItems}`} />
-              <SummaryStat label="Due now" value={String(deckAggregate.dueItems)} />
-              <SummaryStat label="Weak" value={String(deckAggregate.weakItems)} />
+              <SummaryStat label="Practised" value={`${scopeAggregate.itemsSeen}/${scopeAggregate.totalItems}`} />
+              <SummaryStat label="Due now" value={String(scopeAggregate.dueItems)} />
+              <SummaryStat label="Weak" value={String(scopeAggregate.weakItems)} />
               <SummaryStat label="XP" value={String(learnerProfile.totalXp)} />
             </div>
             <p className="mt-4 text-xs uppercase tracking-[0.18em] text-fog">
-              {deckAggregate.practiceState.replace(/-/g, ' ')}
+              {scopeAggregate.practiceState.replace(/-/g, ' ')} across {snapshot.sourceDecks.length} decks
             </p>
           </aside>
 
@@ -368,6 +370,14 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
     nextEntryStateMap.set(currentEntry.id, updatedEntryState);
 
     setEntryStateMap(nextEntryStateMap);
+    setScopeAggregate(
+      buildSelectionAggregate(
+        snapshot,
+        [...nextEntryStateMap.values()],
+        new Date(),
+      ),
+    );
+
     await learnerRepository.saveEntryState(updatedEntryState);
   }
 
@@ -385,21 +395,18 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
     });
     const nextEntryStateMap = new Map(entryStateMap);
     nextEntryStateMap.set(currentEntry.id, reviewResult.entryState);
+    const nextEntryStates = [...nextEntryStateMap.values()];
     const nextLearnerProfile = buildUpdatedLearnerProfile({
       totalXp: learnerProfile.totalXp,
       xpGained: reviewResult.xpGained,
       streakDays: learnerProfile.streakDays,
     });
-    const nextDeckAggregate = buildSourceDeckAggregate({
-      deckDefinition: snapshot.deck,
-      entries: snapshot.entries,
-      entryStates: [...nextEntryStateMap.values()],
-      now,
-    });
+    const nextScopeAggregate = buildSelectionAggregate(snapshot, nextEntryStates, now);
+    const nextDeckAggregates = buildDeckAggregates(snapshot, nextEntryStates, now);
 
     setEntryStateMap(nextEntryStateMap);
     setLearnerProfile(nextLearnerProfile);
-    setDeckAggregate(nextDeckAggregate);
+    setScopeAggregate(nextScopeAggregate);
     setSessionXp((current) => current + reviewResult.xpGained);
     setRatingCounts((current) => ({
       ...current,
@@ -409,8 +416,8 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
 
     await Promise.all([
       learnerRepository.saveEntryState(reviewResult.entryState),
-      learnerRepository.saveSetAggregate(nextDeckAggregate),
       learnerRepository.saveProfile(nextLearnerProfile),
+      ...nextDeckAggregates.map((setAggregate) => learnerRepository.saveSetAggregate(setAggregate)),
     ]);
 
     if (currentIndex >= snapshot.entries.length - 1) {
@@ -459,6 +466,88 @@ function SummaryStat({ label, value }: { label: string; value: string }) {
       <p className="mt-2 text-lg font-medium text-chalk">{value}</p>
     </div>
   );
+}
+
+function buildSelectionAggregate(
+  snapshot: FlashcardSessionSnapshot,
+  entryStates: LearnerEntryState[],
+  now: Date,
+): SetAggregate {
+  return buildSourceDeckAggregate({
+    deckDefinition: createSelectionDefinition(snapshot),
+    entries: snapshot.selectedEntries,
+    entryStates,
+    now,
+  });
+}
+
+function buildDeckAggregates(
+  snapshot: FlashcardSessionSnapshot,
+  entryStates: LearnerEntryState[],
+  now: Date,
+): SetAggregate[] {
+  return snapshot.sourceDecks
+    .map((sourceDeck) => buildSourceDeckAggregate({
+      deckDefinition: sourceDeck,
+      entries: snapshot.sourceDeckEntries.filter(
+        (entry) => entry.sourceDeckId === sourceDeck.id,
+      ),
+      entryStates,
+      now,
+    }));
+}
+
+function createSelectionDefinition(
+  snapshot: FlashcardSessionSnapshot,
+): ContentSetDefinition {
+  return {
+    id: 'study-selection',
+    kind: 'source-deck',
+    title: getSelectionTitle(snapshot),
+    themeId: snapshot.theme?.id ?? null,
+    categoryId: snapshot.category?.id ?? null,
+    grammarTypeId: snapshot.grammarType?.id ?? null,
+    sourceDeckId: null,
+    totalItems: snapshot.resultCount,
+  };
+}
+
+function getSelectionTitle(snapshot: FlashcardSessionSnapshot): string {
+  if (snapshot.selection.sourceDeckIds.length === 1 && snapshot.sourceDecks.length === 1) {
+    return snapshot.sourceDecks[0]?.title ?? 'Flashcards';
+  }
+
+  if (snapshot.category !== null && snapshot.grammarType !== null) {
+    return `${snapshot.category.title} / ${snapshot.grammarType.title}`;
+  }
+
+  if (snapshot.category !== null) {
+    return snapshot.category.title;
+  }
+
+  if (snapshot.theme !== null) {
+    return snapshot.theme.title;
+  }
+
+  if (snapshot.grammarType !== null) {
+    return snapshot.grammarType.title;
+  }
+
+  return 'Flashcards';
+}
+
+function getSelectionMeta(snapshot: FlashcardSessionSnapshot): string {
+  const parts = [
+    snapshot.theme?.title,
+    snapshot.category?.title,
+    snapshot.grammarType?.title,
+  ].filter((value): value is string => value !== undefined);
+
+  if (parts.length === 0) {
+    return `${snapshot.resultCount} matching cards across ${snapshot.sourceDecks.length} source decks.`;
+  }
+
+  return `${parts.join(' / ')} with ${snapshot.resultCount} matching cards across ${snapshot.sourceDecks.length} source decks.`;
 }
 
 function speakText(text: string, language: string) {

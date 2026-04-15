@@ -5,3 +5,4 @@ export * from './dashboard/get-dashboard-snapshot';
 export * from './decks/get-deck-detail-snapshot';
 export * from './study/apply-flashcard-review';
 export * from './study/get-flashcard-session';
+export * from './study/get-study-launch-snapshot';
