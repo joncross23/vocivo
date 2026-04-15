@@ -9,3 +9,4 @@ export * from './study/get-flashcard-session';
 export * from './study/get-matching-session';
 export * from './study/get-practice-test-session';
 export * from './study/get-study-launch-snapshot';
+export * from './study/get-word-sprint-session';

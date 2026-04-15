@@ -86,6 +86,13 @@ export function DeckDetailPage({
               })}
               label="Matching"
             />
+            <ActionLink
+              href={buildStudyHref({
+                selection: deckSelection,
+                mode: 'word-sprint',
+              })}
+              label="Word sprint"
+            />
           </div>
         </div>
 

@@ -169,6 +169,10 @@ describe('getDashboardSnapshot', () => {
     ]);
     expect(snapshot.dueTodayCount).toBe(2);
     expect(snapshot.weakEntryCount).toBe(1);
+    expect(snapshot.masteredEntryCount).toBe(1);
+    expect(snapshot.practisedEntryCount).toBe(3);
+    expect(snapshot.practisedDeckCount).toBe(3);
+    expect(snapshot.wellPractisedDeckCount).toBe(1);
     expect(snapshot.currentLevel).toBe(12);
     expect(snapshot.streakDays).toBe(18);
     expect(snapshot.totalXp).toBe(14400);

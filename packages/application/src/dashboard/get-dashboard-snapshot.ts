@@ -11,6 +11,10 @@ export interface DashboardSnapshot {
   neglectedSets: ContentSetSummary[];
   dueTodayCount: number;
   weakEntryCount: number;
+  masteredEntryCount: number;
+  practisedEntryCount: number;
+  practisedDeckCount: number;
+  wellPractisedDeckCount: number;
   currentLevel: number;
   streakDays: number;
   totalXp: number;
@@ -48,6 +52,12 @@ export async function getDashboardSnapshot({
       .slice(0, NEGLECTED_SET_LIMIT),
     dueTodayCount: countDueToday(entryStates, now),
     weakEntryCount: entryStates.filter((entryState) => entryState.status === 'weak').length,
+    masteredEntryCount: entryStates.filter((entryState) => entryState.status === 'mastered').length,
+    practisedEntryCount: entryStates.filter(isPractisedEntryState).length,
+    practisedDeckCount: sourceDeckSetSummaries.filter((setSummary) => setSummary.itemsSeen > 0).length,
+    wellPractisedDeckCount: sourceDeckSetSummaries.filter(
+      (setSummary) => setSummary.practiceState === 'well-practised',
+    ).length,
     currentLevel: profile.currentLevel,
     streakDays: profile.streakDays,
     totalXp: profile.totalXp,
@@ -82,4 +92,11 @@ function countDueToday(entryStates: LearnerEntryState[], now: Date): number {
 
     return Date.parse(entryState.dueAt) <= endOfToday.getTime();
   }).length;
+}
+
+function isPractisedEntryState(entryState: LearnerEntryState): boolean {
+  return entryState.status !== 'unseen'
+    || entryState.lastPractisedAt !== null
+    || entryState.scoredInteractions > 0
+    || entryState.correctInteractions > 0;
 }

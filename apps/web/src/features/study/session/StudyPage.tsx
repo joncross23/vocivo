@@ -89,7 +89,7 @@ export function StudyPage({ snapshot, allSetDefinitions }: StudyPageProps) {
                 </span>
               </div>
 
-              <div className="mt-5 grid gap-4 xl:grid-cols-3">
+              <div className="mt-5 grid gap-4 xl:grid-cols-2">
                 <ModeCard
                   title="Flashcards"
                   description="Live now with persisted ratings, audio, bookmarks, and shared XP."
@@ -119,6 +119,16 @@ export function StudyPage({ snapshot, allSetDefinitions }: StudyPageProps) {
                     mode: 'matching',
                   })}
                   ctaLabel="Launch matching"
+                />
+                <ModeCard
+                  title="Word Sprint"
+                  description="A faster typing race with streak pressure, speed bonus XP, and shareable results."
+                  meta={`${snapshot.practiceTestEligibleCount} sprint-ready terms`}
+                  href={buildStudyHref({
+                    selection: snapshot.selection,
+                    mode: 'word-sprint',
+                  })}
+                  ctaLabel="Launch word sprint"
                 />
               </div>
             </section>
