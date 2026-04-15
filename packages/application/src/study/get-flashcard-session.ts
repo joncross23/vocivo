@@ -10,6 +10,7 @@ export interface FlashcardSessionSnapshot {
   theme: ContentSetDefinition | null;
   category: ContentSetDefinition | null;
   grammarType: ContentSetDefinition | null;
+  sourceDeckDefinitions: ContentSetDefinition[];
 }
 
 export interface GetFlashcardSessionDependencies {
@@ -48,5 +49,8 @@ export async function getFlashcardSession({
       setDefinition.kind === 'category' && setDefinition.id === deck.categoryId) ?? null,
     grammarType: setDefinitions.find((setDefinition) =>
       setDefinition.kind === 'grammar-type' && setDefinition.id === deck.grammarTypeId) ?? null,
+    sourceDeckDefinitions: setDefinitions.filter(
+      (setDefinition) => setDefinition.kind === 'source-deck',
+    ),
   };
 }

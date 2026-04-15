@@ -107,6 +107,9 @@ describe('getFlashcardSession', () => {
     expect(snapshot?.theme?.id).toBe('theme-3');
     expect(snapshot?.category?.id).toBe('media-and-technology');
     expect(snapshot?.grammarType?.id).toBe('nouns');
+    expect(snapshot?.sourceDeckDefinitions.map((setDefinition) => setDefinition.id)).toEqual([
+      'deck-media-nouns',
+    ]);
     expect(snapshot?.entries).toHaveLength(2);
   });
 });

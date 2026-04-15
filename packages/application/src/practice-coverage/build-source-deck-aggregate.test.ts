@@ -105,4 +105,81 @@ describe('buildSourceDeckAggregate', () => {
       lastPractisedAt: '2026-04-15T09:00:00.000Z',
     });
   });
+
+  it('does not count bookmark-only unseen entries as practised coverage', () => {
+    const aggregate = buildSourceDeckAggregate({
+      deckDefinition: {
+        id: 'deck-1',
+        kind: 'source-deck',
+        title: 'Identity / adjectives',
+        themeId: 'theme-1',
+        categoryId: 'identity-and-relationships',
+        grammarTypeId: 'adjectives',
+        sourceDeckId: 'deck-1',
+        totalItems: 2,
+      },
+      entries: [
+        {
+          id: 'entry-1',
+          sourceDeckId: 'deck-1',
+          themeId: 'theme-1',
+          categoryId: 'identity-and-relationships',
+          grammarTypeId: 'adjectives',
+          spanish: 'alegre',
+          englishPrimary: 'cheerful',
+          englishAlternates: [],
+          rawDefinition: 'cheerful',
+          answerComplexity: 'clean',
+          modeEligibility: {
+            reverseSafe: true,
+            typingSafe: true,
+            matchingSafe: true,
+            arcadeSafe: true,
+          },
+        },
+        {
+          id: 'entry-2',
+          sourceDeckId: 'deck-1',
+          themeId: 'theme-1',
+          categoryId: 'identity-and-relationships',
+          grammarTypeId: 'adjectives',
+          spanish: 'paciente',
+          englishPrimary: 'patient',
+          englishAlternates: [],
+          rawDefinition: 'patient',
+          answerComplexity: 'clean',
+          modeEligibility: {
+            reverseSafe: true,
+            typingSafe: true,
+            matchingSafe: true,
+            arcadeSafe: true,
+          },
+        },
+      ],
+      entryStates: [
+        {
+          entryId: 'entry-1',
+          status: 'unseen',
+          bookmarked: true,
+          dueAt: null,
+          lastPractisedAt: null,
+          scoredInteractions: 0,
+          correctInteractions: 0,
+        },
+      ],
+      now: new Date('2026-04-15T12:00:00.000Z'),
+    });
+
+    expect(aggregate).toEqual({
+      setId: 'deck-1',
+      totalItems: 2,
+      itemsSeen: 0,
+      dueItems: 0,
+      weakItems: 0,
+      scoredInteractions: 0,
+      correctInteractions: 0,
+      practiceState: 'untouched',
+      lastPractisedAt: null,
+    });
+  });
 });

@@ -25,7 +25,7 @@ export function buildSourceDeckAggregate({
   const deckEntryStates = entries
     .map((entry) => entryStateById.get(entry.id))
     .filter((entryState): entryState is LearnerEntryState => entryState !== undefined);
-  const itemsSeen = deckEntryStates.length;
+  const itemsSeen = deckEntryStates.filter(isPractisedEntryState).length;
   const dueItems = deckEntryStates.filter((entryState) =>
     entryState.dueAt !== null && Date.parse(entryState.dueAt) <= now.getTime()).length;
   const weakItems = deckEntryStates.filter((entryState) => entryState.status === 'weak').length;
@@ -73,4 +73,11 @@ function getLatestPractisedAt(entryStates: LearnerEntryState[]): string | null {
   }
 
   return latestPractisedAt;
+}
+
+function isPractisedEntryState(entryState: LearnerEntryState): boolean {
+  return entryState.status !== 'unseen'
+    || entryState.lastPractisedAt !== null
+    || entryState.scoredInteractions > 0
+    || entryState.correctInteractions > 0;
 }

@@ -59,7 +59,7 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
     let isCancelled = false;
 
     async function loadLearnerState() {
-      const repository = await ensurePreviewLearnerSeed([snapshot.deck]);
+      const repository = await ensurePreviewLearnerSeed(snapshot.sourceDeckDefinitions);
       const [profile, entryStates] = await Promise.all([
         repository.getProfile(),
         repository.listEntryStates(),
@@ -101,7 +101,7 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
 
       if (event.key === ' ') {
         event.preventDefault();
-        setShowAnswer(true);
+        setShowAnswer((current) => !current);
         return;
       }
 
@@ -321,7 +321,7 @@ export function FlashcardsPage({ snapshot }: FlashcardsPageProps) {
               Live coverage
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <SummaryStat label="Seen" value={`${deckAggregate.itemsSeen}/${deckAggregate.totalItems}`} />
+              <SummaryStat label="Practised" value={`${deckAggregate.itemsSeen}/${deckAggregate.totalItems}`} />
               <SummaryStat label="Due now" value={String(deckAggregate.dueItems)} />
               <SummaryStat label="Weak" value={String(deckAggregate.weakItems)} />
               <SummaryStat label="XP" value={String(learnerProfile.totalXp)} />
