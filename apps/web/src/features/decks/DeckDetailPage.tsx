@@ -82,8 +82,9 @@ export function DeckDetailPage({
             <ActionLink
               href={buildStudyHref({
                 selection: deckSelection,
+                mode: 'matching',
               })}
-              label="Match setup"
+              label="Matching"
             />
           </div>
         </div>

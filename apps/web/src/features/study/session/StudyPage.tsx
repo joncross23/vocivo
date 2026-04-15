@@ -114,7 +114,11 @@ export function StudyPage({ snapshot, allSetDefinitions }: StudyPageProps) {
                   title="Matching"
                   description="Timed matching will reuse the same selection without rebuilding the deck."
                   meta={`${snapshot.matchingEligibleCount} match-safe terms`}
-                  badge="Next"
+                  href={buildStudyHref({
+                    selection: snapshot.selection,
+                    mode: 'matching',
+                  })}
+                  ctaLabel="Launch matching"
                 />
               </div>
             </section>
