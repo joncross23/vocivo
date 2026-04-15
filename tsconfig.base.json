@@ -22,6 +22,8 @@
       "@vocivo/domain": ["packages/domain/src/index.ts"],
       "@vocivo/application": ["packages/application/src/index.ts"],
       "@vocivo/infrastructure": ["packages/infrastructure/src/index.ts"],
+      "@vocivo/infrastructure/in-memory-content": ["packages/infrastructure/src/repositories/in-memory-content.repository.ts"],
+      "@vocivo/infrastructure/local-storage-learner": ["packages/infrastructure/src/repositories/local-storage-learner.repository.ts"],
       "@vocivo/content-pipeline": ["packages/content-pipeline/src/index.ts"],
       "@vocivo/ui": ["packages/ui/src/index.ts"],
       "@vocivo/testkit": ["packages/testkit/src/index.ts"]

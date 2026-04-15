@@ -7,7 +7,7 @@ interface BrowsePageRouteProps {
 
 export default async function Page({ searchParams }: BrowsePageRouteProps) {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const snapshot = await getBrowsePageSnapshot({
+  const pageSnapshot = await getBrowsePageSnapshot({
     themeIds: toArray(resolvedSearchParams.theme),
     categoryIds: toArray(resolvedSearchParams.category),
     grammarTypeIds: toArray(resolvedSearchParams.grammar),
@@ -17,7 +17,12 @@ export default async function Page({ searchParams }: BrowsePageRouteProps) {
     includeBookmarkedOnly: false,
   });
 
-  return <BrowsePage snapshot={snapshot} />;
+  return (
+    <BrowsePage
+      snapshot={pageSnapshot.snapshot}
+      allSetDefinitions={pageSnapshot.allSetDefinitions}
+    />
+  );
 }
 
 function toArray(value: string | string[] | undefined): string[] {

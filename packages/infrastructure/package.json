@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./in-memory-content": "./src/repositories/in-memory-content.repository.ts",
+    "./local-storage-learner": "./src/repositories/local-storage-learner.repository.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

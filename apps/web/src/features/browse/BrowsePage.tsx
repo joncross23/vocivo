@@ -1,17 +1,31 @@
+'use client';
+
 import Link from 'next/link';
 import type { BrowseSnapshot } from '@vocivo/application';
-import type { SessionSelection } from '@vocivo/contracts';
+import type {
+  ContentSetDefinition,
+  ContentSetSummary,
+  SessionSelection,
+} from '@vocivo/contracts';
+import { usePersistedSetSummaryMap } from '../../lib/client/use-persisted-set-summary-map';
 import { AppShell } from '../shell/AppShell';
 import { buildBrowseHref } from './build-browse-href';
 
 interface BrowsePageProps {
   snapshot: BrowseSnapshot;
+  allSetDefinitions: ContentSetDefinition[];
 }
 
-export function BrowsePage({ snapshot }: BrowsePageProps) {
+export function BrowsePage({ snapshot, allSetDefinitions }: BrowsePageProps) {
   const selectedThemeId = snapshot.selection.themeIds[0] ?? null;
   const selectedCategoryId = snapshot.selection.categoryIds[0] ?? null;
   const selectedGrammarTypeId = snapshot.selection.grammarTypeIds[0] ?? null;
+  const setSummaryMap = usePersistedSetSummaryMap({
+    allSetDefinitions,
+    seedSourceDeckDefinitions: allSetDefinitions.filter(
+      (setDefinition) => setDefinition.kind === 'source-deck',
+    ),
+  });
 
   return (
     <AppShell>
@@ -50,6 +64,7 @@ export function BrowsePage({ snapshot }: BrowsePageProps) {
                   isActive={selectedThemeId === theme.id}
                   title={theme.title}
                   meta={`${theme.totalItems} words`}
+                  coverage={setSummaryMap.get(theme.id)}
                 />
               ))}
             </BrowseSection>
@@ -68,6 +83,7 @@ export function BrowsePage({ snapshot }: BrowsePageProps) {
                   })}
                   isActive={selectedCategoryId === category.id}
                   label={category.title}
+                  meta={formatCompactCoverage(setSummaryMap.get(category.id))}
                 />
               ))}
             </BrowseSection>
@@ -87,6 +103,7 @@ export function BrowsePage({ snapshot }: BrowsePageProps) {
                   })}
                   isActive={selectedGrammarTypeId === grammarType.id}
                   label={grammarType.title}
+                  meta={formatCompactCoverage(setSummaryMap.get(grammarType.id))}
                 />
               ))}
             </BrowseSection>
@@ -120,10 +137,18 @@ export function BrowsePage({ snapshot }: BrowsePageProps) {
                       <p className="mt-1 text-xs uppercase tracking-[0.2em] text-fog">
                         {formatDeckMeta(sourceDeck, snapshot.selection)}
                       </p>
+                      <p className="mt-2 text-xs uppercase tracking-[0.18em] text-fog">
+                        {formatCoverageLine(setSummaryMap.get(sourceDeck.id))}
+                      </p>
                     </div>
-                    <span className="rounded-full border border-glow/20 px-3 py-1 text-xs text-chalk">
-                      {sourceDeck.totalItems} words
-                    </span>
+                    <div className="text-right">
+                      <span className="rounded-full border border-glow/20 px-3 py-1 text-xs text-chalk">
+                        {sourceDeck.totalItems} words
+                      </span>
+                      <p className="mt-2 text-xs uppercase tracking-[0.18em] text-fog">
+                        {formatCoverageCounts(setSummaryMap.get(sourceDeck.id))}
+                      </p>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -155,11 +180,13 @@ function BrowseCard({
   isActive,
   title,
   meta,
+  coverage,
 }: {
   href: string;
   isActive: boolean;
   title: string;
   meta: string;
+  coverage?: ContentSetSummary;
 }) {
   return (
     <Link
@@ -172,6 +199,9 @@ function BrowseCard({
     >
       <p className="font-medium text-chalk">{title}</p>
       <p className="mt-2 text-xs uppercase tracking-[0.2em] text-fog">{meta}</p>
+      <p className="mt-3 text-xs uppercase tracking-[0.18em] text-fog">
+        {formatCoverageLine(coverage)}
+      </p>
     </Link>
   );
 }
@@ -180,21 +210,28 @@ function FilterChip({
   href,
   isActive,
   label,
+  meta,
 }: {
   href: string;
   isActive: boolean;
   label: string;
+  meta?: string;
 }) {
   return (
     <Link
       href={href}
-      className={`rounded-full border px-4 py-2 text-sm transition-transform hover:-translate-y-0.5 ${
+      className={`rounded-2xl border px-4 py-3 text-sm transition-transform hover:-translate-y-0.5 ${
         isActive
           ? 'border-glow/40 bg-glow/10 text-chalk'
           : 'border-white/10 bg-white/5 text-fog hover:border-glow/20 hover:bg-white/10 hover:text-chalk'
       }`}
     >
-      {label}
+      <span className="block">{label}</span>
+      {meta === undefined ? null : (
+        <span className="mt-1 block text-xs uppercase tracking-[0.18em] text-fog">
+          {meta}
+        </span>
+      )}
     </Link>
   );
 }
@@ -215,5 +252,33 @@ function formatDeckMeta(
 }
 
 function humaniseId(value: string): string {
+  return value.replace(/-/g, ' ');
+}
+
+function formatCompactCoverage(setSummary?: ContentSetSummary): string | undefined {
+  if (setSummary === undefined) {
+    return undefined;
+  }
+
+  return `${formatPracticeState(setSummary.practiceState)} · ${setSummary.itemsSeen}/${setSummary.totalItems}`;
+}
+
+function formatCoverageLine(setSummary?: ContentSetSummary): string {
+  if (setSummary === undefined) {
+    return 'untouched · 0 seen';
+  }
+
+  return `${formatPracticeState(setSummary.practiceState)} · ${setSummary.itemsSeen}/${setSummary.totalItems} seen`;
+}
+
+function formatCoverageCounts(setSummary?: ContentSetSummary): string {
+  if (setSummary === undefined) {
+    return 'Due 0 · Weak 0';
+  }
+
+  return `Due ${setSummary.dueItems} · Weak ${setSummary.weakItems}`;
+}
+
+function formatPracticeState(value: ContentSetSummary['practiceState']): string {
   return value.replace(/-/g, ' ');
 }

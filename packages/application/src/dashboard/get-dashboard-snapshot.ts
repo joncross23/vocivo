@@ -1,12 +1,11 @@
 import type {
   ContentRepository,
-  ContentSetDefinition,
   ContentSetSummary,
   LearnerRepository,
   LearnerEntryState,
-  SetAggregate,
 } from '@vocivo/contracts';
 import { rankPracticeState } from '@vocivo/domain';
+import { buildContentSetSummaries } from '../practice-coverage/build-content-set-summaries';
 
 export interface DashboardSnapshot {
   neglectedSets: ContentSetSummary[];
@@ -37,7 +36,11 @@ export async function getDashboardSnapshot({
     learnerRepository.getProfile(),
   ]);
 
-  const sourceDeckSetSummaries = buildSourceDeckSetSummaries(setDefinitions, setAggregates);
+  const sourceDeckSetSummaries = buildContentSetSummaries({
+    setDefinitions,
+    setAggregates,
+    now,
+  }).filter((setSummary) => setSummary.kind === 'source-deck');
 
   return {
     neglectedSets: sourceDeckSetSummaries
@@ -48,33 +51,6 @@ export async function getDashboardSnapshot({
     currentLevel: profile.currentLevel,
     streakDays: profile.streakDays,
     totalXp: profile.totalXp,
-  };
-}
-
-function buildSourceDeckSetSummaries(
-  setDefinitions: ContentSetDefinition[],
-  setAggregates: SetAggregate[],
-): ContentSetSummary[] {
-  const setAggregateById = new Map(
-    setAggregates.map((setAggregate) => [setAggregate.setId, setAggregate]),
-  );
-
-  return setDefinitions
-    .filter((setDefinition) => setDefinition.kind === 'source-deck')
-    .map((setDefinition) => toContentSetSummary(setDefinition, setAggregateById.get(setDefinition.id)));
-}
-
-function toContentSetSummary(
-  setDefinition: ContentSetDefinition,
-  setAggregate?: SetAggregate,
-): ContentSetSummary {
-  return {
-    ...setDefinition,
-    itemsSeen: setAggregate?.itemsSeen ?? 0,
-    dueItems: setAggregate?.dueItems ?? 0,
-    weakItems: setAggregate?.weakItems ?? 0,
-    practiceState: setAggregate?.practiceState ?? 'untouched',
-    lastPractisedAt: setAggregate?.lastPractisedAt ?? null,
   };
 }
 

@@ -11,9 +11,9 @@ export function getContentRepository() {
 }
 
 function resolveCsvFilePath(): string {
-  let currentDirectory = process.cwd();
+  let currentDirectory: string | null = process.cwd();
 
-  while (true) {
+  while (currentDirectory !== null) {
     const candidate = join(currentDirectory, 'data/raw/knowt_flashcards_translations_full.csv');
 
     if (existsSync(candidate)) {
@@ -22,11 +22,7 @@ function resolveCsvFilePath(): string {
 
     const parentDirectory = dirname(currentDirectory);
 
-    if (parentDirectory === currentDirectory) {
-      break;
-    }
-
-    currentDirectory = parentDirectory;
+    currentDirectory = parentDirectory === currentDirectory ? null : parentDirectory;
   }
 
   throw new Error(

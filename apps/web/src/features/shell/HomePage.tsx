@@ -1,4 +1,8 @@
+'use client';
+
 import type { DashboardSnapshot } from '@vocivo/application';
+import type { ContentSetDefinition } from '@vocivo/contracts';
+import { useLiveDashboardSnapshot } from '../../lib/client/use-live-dashboard-snapshot';
 import { AppShell } from './AppShell';
 
 const launchItems = [
@@ -10,10 +14,19 @@ const launchItems = [
 ] as const;
 
 interface HomePageProps {
-  snapshot: DashboardSnapshot;
+  initialSnapshot: DashboardSnapshot;
+  sourceDeckDefinitions: ContentSetDefinition[];
 }
 
-export function HomePage({ snapshot }: HomePageProps) {
+export function HomePage({
+  initialSnapshot,
+  sourceDeckDefinitions,
+}: HomePageProps) {
+  const snapshot = useLiveDashboardSnapshot({
+    initialSnapshot,
+    sourceDeckDefinitions,
+  });
+
   return (
     <AppShell>
       <section className="grid gap-6 lg:grid-cols-[1.3fr,0.9fr]">

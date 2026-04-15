@@ -4,5 +4,10 @@ import { getHomePageSnapshot } from '../lib/server/get-home-page-snapshot';
 export default async function Page() {
   const snapshot = await getHomePageSnapshot();
 
-  return <HomePage snapshot={snapshot} />;
+  return (
+    <HomePage
+      initialSnapshot={snapshot.initialSnapshot}
+      sourceDeckDefinitions={snapshot.sourceDeckDefinitions}
+    />
+  );
 }

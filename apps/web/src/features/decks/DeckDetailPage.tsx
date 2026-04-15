@@ -1,12 +1,33 @@
+'use client';
+
 import Link from 'next/link';
 import type { DeckDetailSnapshot } from '@vocivo/application';
+import type { ContentSetDefinition, ContentSetSummary } from '@vocivo/contracts';
+import { usePersistedSetSummaryMap } from '../../lib/client/use-persisted-set-summary-map';
 import { AppShell } from '../shell/AppShell';
 
 interface DeckDetailPageProps {
   snapshot: DeckDetailSnapshot;
+  allSetDefinitions: ContentSetDefinition[];
 }
 
-export function DeckDetailPage({ snapshot }: DeckDetailPageProps) {
+export function DeckDetailPage({
+  snapshot,
+  allSetDefinitions,
+}: DeckDetailPageProps) {
+  const setSummaryMap = usePersistedSetSummaryMap({
+    allSetDefinitions,
+    seedSourceDeckDefinitions: allSetDefinitions.filter(
+      (setDefinition) => setDefinition.kind === 'source-deck',
+    ),
+  });
+  const deckSummary = setSummaryMap.get(snapshot.deck.id);
+  const themeSummary = snapshot.theme === null ? undefined : setSummaryMap.get(snapshot.theme.id);
+  const categorySummary = snapshot.category === null ? undefined : setSummaryMap.get(snapshot.category.id);
+  const grammarTypeSummary = snapshot.grammarType === null
+    ? undefined
+    : setSummaryMap.get(snapshot.grammarType.id);
+
   return (
     <AppShell>
       <section className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
@@ -22,10 +43,12 @@ export function DeckDetailPage({ snapshot }: DeckDetailPageProps) {
             {snapshot.grammarType?.title ?? 'Unknown grammar type'}
           </p>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <DeckStat label="Terms" value={String(snapshot.deck.totalItems)} />
-            <DeckStat label="Theme" value={humanise(snapshot.deck.themeId)} />
-            <DeckStat label="Type" value={humanise(snapshot.deck.grammarTypeId)} />
+            <CoverageStat label="Deck coverage" summary={deckSummary} />
+            <CoverageStat label="Theme coverage" summary={themeSummary} />
+            <CoverageStat label="Category coverage" summary={categorySummary} />
+            <CoverageStat label="Grammar coverage" summary={grammarTypeSummary} />
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -80,6 +103,29 @@ function DeckStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function CoverageStat({
+  label,
+  summary,
+}: {
+  label: string;
+  summary?: ContentSetSummary;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <p className="text-xs uppercase tracking-[0.2em] text-fog">{label}</p>
+      <p className="mt-2 text-sm font-medium uppercase tracking-[0.18em] text-chalk">
+        {summary === undefined ? 'untouched' : formatPracticeState(summary.practiceState)}
+      </p>
+      <p className="mt-2 text-xs uppercase tracking-[0.16em] text-fog">
+        {summary === undefined ? '0/0 seen' : `${summary.itemsSeen}/${summary.totalItems} seen`}
+      </p>
+      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-fog">
+        {summary === undefined ? 'Due 0 · Weak 0' : `Due ${summary.dueItems} · Weak ${summary.weakItems}`}
+      </p>
+    </div>
+  );
+}
+
 function ActionButton({ label }: { label: string }) {
   return (
     <button
@@ -91,6 +137,6 @@ function ActionButton({ label }: { label: string }) {
   );
 }
 
-function humanise(value: string | null): string {
-  return value === null ? 'All' : value.replace(/-/g, ' ');
+function formatPracticeState(value: ContentSetSummary['practiceState']): string {
+  return value.replace(/-/g, ' ');
 }

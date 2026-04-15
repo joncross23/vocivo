@@ -10,11 +10,16 @@ interface DeckPageRouteProps {
 
 export default async function Page({ params }: DeckPageRouteProps) {
   const { deckId } = await params;
-  const snapshot = await getDeckPageSnapshot(deckId);
+  const pageSnapshot = await getDeckPageSnapshot(deckId);
 
-  if (snapshot === null) {
+  if (pageSnapshot === null) {
     notFound();
   }
 
-  return <DeckDetailPage snapshot={snapshot} />;
+  return (
+    <DeckDetailPage
+      snapshot={pageSnapshot.snapshot}
+      allSetDefinitions={pageSnapshot.allSetDefinitions}
+    />
+  );
 }
