@@ -75,8 +75,9 @@ export function DeckDetailPage({
             <ActionLink
               href={buildStudyHref({
                 selection: deckSelection,
+                mode: 'practice-test',
               })}
-              label="Practice test setup"
+              label="Practice test"
             />
             <ActionLink
               href={buildStudyHref({

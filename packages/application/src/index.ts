@@ -4,5 +4,7 @@ export * from './browse/get-browse-snapshot';
 export * from './dashboard/get-dashboard-snapshot';
 export * from './decks/get-deck-detail-snapshot';
 export * from './study/apply-flashcard-review';
+export * from './study/evaluate-written-answer';
 export * from './study/get-flashcard-session';
+export * from './study/get-practice-test-session';
 export * from './study/get-study-launch-snapshot';

@@ -104,7 +104,11 @@ export function StudyPage({ snapshot, allSetDefinitions }: StudyPageProps) {
                   title="Practice test"
                   description="Typed answers and written recall will launch from this same study scope."
                   meta={`${snapshot.practiceTestEligibleCount} typing-safe terms`}
-                  badge="Next"
+                  href={buildStudyHref({
+                    selection: snapshot.selection,
+                    mode: 'practice-test',
+                  })}
+                  ctaLabel="Launch practice test"
                 />
                 <ModeCard
                   title="Matching"
